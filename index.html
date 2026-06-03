@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ứng dụng tương tác khám phá từng chương của sách Grokking Algorithms – Sơ đồ tư duy, Mô phỏng thuật toán, Code mẫu & Quiz.">
+  <title>Grokking Algorithms – Interactive Explorer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- ======= Header ======= -->
+    <header>
+      <div class="logo-section">
+        <h1>📘 Grokking Algorithms</h1>
+        <p>Interactive Explorer – Khám phá thuật toán từng phần nhỏ</p>
+      </div>
+
+      <div class="header-controls">
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+          <button class="nav-tab active" data-view="dashboard">📊 Dashboard</button>
+          <button class="nav-tab" data-view="mindmap">🗺️ Mind Map</button>
+        </nav>
+
+        <!-- Search -->
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" placeholder="Tìm khái niệm... (Big O, Hash, BFS...)">
+        </div>
+      </div>
+    </header>
+
+    <!-- ======= Progress Bar ======= -->
+    <div style="margin-bottom: 25px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 18px; display: flex; align-items: center; gap: 15px;">
+      <span style="font-size: 13px; font-weight: 600; white-space: nowrap;">📈 Tiến trình học:</span>
+      <div style="flex-grow: 1; background: rgba(255,255,255,0.06); border-radius: 20px; height: 10px; overflow: hidden;">
+        <div id="progress-bar-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 20px; transition: width 0.5s ease;"></div>
+      </div>
+      <span id="progress-label" style="font-size: 12px; color: #94a3b8; white-space: nowrap;">0/13 chương (0%)</span>
+    </div>
+
+    <!-- ======= Dashboard View (Chapter Grid) ======= -->
+    <div class="dashboard-view">
+      <!-- Cards rendered by app.js -->
+    </div>
+
+    <!-- ======= Workspace View (Chapter Detail – Split Layout) ======= -->
+    <div class="workspace-view">
+      <!-- Left Side Panel -->
+      <div class="side-panel">
+        <!-- Rendered by app.js -->
+      </div>
+
+      <!-- Right Main Workspace -->
+      <div class="main-workspace">
+        <!-- Tabs + Panels rendered by app.js -->
+      </div>
+    </div>
+
+    <!-- ======= Mind Map View ======= -->
+    <div class="mindmap-view">
+      <!-- Rendered by app.js -->
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="simulators.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
