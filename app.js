@@ -329,146 +329,433 @@
   }
 
   // ---- Mind Map View ----
+  let mapState = {
+    zoom: 1,
+    panX: 0,
+    panY: 0,
+    isPanning: false,
+    startX: 0,
+    startY: 0,
+    expandedChapterId: null,
+    subBranchGroup: null
+  };
+
   function renderMindMap() {
     const container = $(".mindmap-view");
+
+    // Reset map state
+    mapState.zoom = 1;
+    mapState.panX = 0;
+    mapState.panY = 0;
+    mapState.expandedChapterId = null;
+
     container.innerHTML = `
-      <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-        <h3 style="font-size:18px;">🗺️ Sơ đồ tư duy tổng quan – Grokking Algorithms</h3>
-        <button class="back-btn" id="btn-back-map">← Quay lại Dashboard</button>
+      <div class="mindmap-header">
+        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+          <h3>🗺️ Sơ đồ tư duy – Grokking Algorithms</h3>
+          <button class="back-btn" id="btn-back-map">← Dashboard</button>
+        </div>
+        <div class="mindmap-zoom-controls">
+          <button class="zoom-btn" id="zoom-out" title="Thu nhỏ">−</button>
+          <span class="zoom-label" id="zoom-label">100%</span>
+          <button class="zoom-btn" id="zoom-in" title="Phóng to">+</button>
+          <button class="zoom-btn" id="zoom-reset" title="Đặt lại" style="font-size:12px;">⟳</button>
+        </div>
       </div>
       <div class="mindmap-svg-container" id="mindmap-container">
-        <div class="mindmap-overlay-tip">Click vào nút bất kỳ để xem chi tiết chương đó</div>
-        <svg id="mindmap-svg" width="1100" height="620"></svg>
+        <div class="mindmap-overlay-tip">🖱️ Cuộn chuột để zoom • Kéo để di chuyển<br>Click vào nút chương để xem nhánh chi tiết</div>
+        <svg id="mindmap-svg" width="2400" height="1600"></svg>
       </div>
     `;
 
+    // Remove any lingering popup
+    const oldPopup = $(".mindmap-detail-popup");
+    if (oldPopup) oldPopup.remove();
+
     $("#btn-back-map").addEventListener("click", () => setView("dashboard"));
+
     drawMindMap();
+    initMapInteractions();
   }
 
+  function initMapInteractions() {
+    const container = $("#mindmap-container");
+    const svg = $("#mindmap-svg");
+
+    // ---- Pan ----
+    container.addEventListener("mousedown", (e) => {
+      // Ignore if clicking on a node or popup
+      if (e.target.closest(".map-node") || e.target.closest(".mindmap-detail-popup")) return;
+      mapState.isPanning = true;
+      mapState.startX = e.clientX - mapState.panX;
+      mapState.startY = e.clientY - mapState.panY;
+      container.classList.add("grabbing");
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!mapState.isPanning) return;
+      mapState.panX = e.clientX - mapState.startX;
+      mapState.panY = e.clientY - mapState.startY;
+      applyTransform();
+    });
+
+    window.addEventListener("mouseup", () => {
+      mapState.isPanning = false;
+      container.classList.remove("grabbing");
+    });
+
+    // ---- Zoom (scroll wheel) ----
+    container.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.08 : 0.08;
+      setZoom(mapState.zoom + delta);
+    }, { passive: false });
+
+    // ---- Zoom buttons ----
+    $("#zoom-in").addEventListener("click", () => setZoom(mapState.zoom + 0.15));
+    $("#zoom-out").addEventListener("click", () => setZoom(mapState.zoom - 0.15));
+    $("#zoom-reset").addEventListener("click", () => {
+      mapState.zoom = 1;
+      mapState.panX = 0;
+      mapState.panY = 0;
+      applyTransform();
+      updateZoomLabel();
+    });
+
+    // Center the view initially
+    const rect = container.getBoundingClientRect();
+    mapState.panX = (rect.width - 2400) / 2;
+    mapState.panY = (rect.height - 1600) / 2 + 100;
+    applyTransform();
+  }
+
+  function setZoom(z) {
+    mapState.zoom = Math.max(0.3, Math.min(3, z));
+    applyTransform();
+    updateZoomLabel();
+  }
+
+  function applyTransform() {
+    const svg = $("#mindmap-svg");
+    if (!svg) return;
+    svg.style.transform = `translate(${mapState.panX}px, ${mapState.panY}px) scale(${mapState.zoom})`;
+    svg.style.transformOrigin = "0 0";
+  }
+
+  function updateZoomLabel() {
+    const label = $("#zoom-label");
+    if (label) label.textContent = Math.round(mapState.zoom * 100) + "%";
+  }
+
+  // ---- Drawing the full Mind Map ----
   function drawMindMap() {
     const svg = $("#mindmap-svg");
     svg.innerHTML = "";
 
-    const cx = 550;
-    const cy = 310;
-    const radius = 240;
+    const cx = 1200; // center X of 2400
+    const cy = 800;  // center Y of 1600
+    const radius = 380;
 
-    // Draw center node
+    // ---- Central Node ----
     const centerG = createSVGElement("g");
-    centerG.setAttribute("class", "map-node");
+    const centerGlow = createSVGElement("circle");
+    centerGlow.setAttribute("cx", cx);
+    centerGlow.setAttribute("cy", cy);
+    centerGlow.setAttribute("r", 80);
+    centerGlow.setAttribute("fill", "none");
+    centerGlow.setAttribute("stroke", "rgba(59, 130, 246, 0.15)");
+    centerGlow.setAttribute("stroke-width", "20");
+    svg.appendChild(centerGlow);
+
     const centerCircle = createSVGElement("circle");
     centerCircle.setAttribute("cx", cx);
     centerCircle.setAttribute("cy", cy);
-    centerCircle.setAttribute("r", 55);
-    centerCircle.setAttribute("fill", "#1e293b");
+    centerCircle.setAttribute("r", 65);
+    centerCircle.setAttribute("fill", "#111827");
     centerCircle.setAttribute("stroke", "#3b82f6");
     centerCircle.setAttribute("stroke-width", "3");
     centerG.appendChild(centerCircle);
 
-    const centerText1 = createSVGElement("text");
-    centerText1.setAttribute("x", cx);
-    centerText1.setAttribute("y", cy - 8);
-    centerText1.setAttribute("text-anchor", "middle");
-    centerText1.setAttribute("fill", "#fff");
-    centerText1.setAttribute("font-size", "13");
-    centerText1.setAttribute("font-weight", "700");
-    centerText1.textContent = "Grokking";
-    centerG.appendChild(centerText1);
+    const cText1 = createSVGElement("text");
+    cText1.setAttribute("x", cx);
+    cText1.setAttribute("y", cy - 10);
+    cText1.setAttribute("text-anchor", "middle");
+    cText1.setAttribute("fill", "#fff");
+    cText1.setAttribute("font-size", "18");
+    cText1.setAttribute("font-weight", "800");
+    cText1.setAttribute("font-family", "Outfit, sans-serif");
+    cText1.textContent = "Grokking";
+    centerG.appendChild(cText1);
 
-    const centerText2 = createSVGElement("text");
-    centerText2.setAttribute("x", cx);
-    centerText2.setAttribute("y", cy + 10);
-    centerText2.setAttribute("text-anchor", "middle");
-    centerText2.setAttribute("fill", "#60a5fa");
-    centerText2.setAttribute("font-size", "12");
-    centerText2.setAttribute("font-weight", "600");
-    centerText2.textContent = "Algorithms";
-    centerG.appendChild(centerText2);
+    const cText2 = createSVGElement("text");
+    cText2.setAttribute("x", cx);
+    cText2.setAttribute("y", cy + 14);
+    cText2.setAttribute("text-anchor", "middle");
+    cText2.setAttribute("fill", "#60a5fa");
+    cText2.setAttribute("font-size", "15");
+    cText2.setAttribute("font-weight", "600");
+    cText2.setAttribute("font-family", "Outfit, sans-serif");
+    cText2.textContent = "Algorithms";
+    centerG.appendChild(cText2);
 
     svg.appendChild(centerG);
 
-    // Place chapter nodes in a circle
+    // ---- Chapter Nodes ----
     const total = GrokkingData.length;
+    const chapterPositions = []; // store for sub-branch drawing
+
     GrokkingData.forEach((ch, i) => {
       const angle = (2 * Math.PI * i) / total - Math.PI / 2;
       const nx = cx + radius * Math.cos(angle);
       const ny = cy + radius * Math.sin(angle);
+      chapterPositions.push({ id: ch.id, x: nx, y: ny, angle });
 
-      // Draw edge line
-      const line = createSVGElement("line");
-      line.setAttribute("x1", cx);
-      line.setAttribute("y1", cy);
-      line.setAttribute("x2", nx);
-      line.setAttribute("y2", ny);
-      line.setAttribute("stroke", ch.color);
-      line.setAttribute("stroke-width", "1.5");
-      line.setAttribute("stroke-opacity", "0.3");
-      svg.appendChild(line);
+      // ---- Edge line (curved) ----
+      const path = createSVGElement("path");
+      const cpx = cx + (nx - cx) * 0.5 + Math.sin(angle) * 40;
+      const cpy = cy + (ny - cy) * 0.5 - Math.cos(angle) * 40;
+      path.setAttribute("d", `M ${cx} ${cy} Q ${cpx} ${cpy} ${nx} ${ny}`);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", ch.color);
+      path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-opacity", "0.3");
+      svg.appendChild(path);
 
-      // Draw chapter node group
+      // ---- Chapter node group ----
       const g = createSVGElement("g");
       g.setAttribute("class", "map-node");
-      g.style.cursor = "pointer";
+      g.setAttribute("data-chapter-id", ch.id);
+
+      // Node glow ring
+      const glowRing = createSVGElement("circle");
+      glowRing.setAttribute("cx", nx);
+      glowRing.setAttribute("cy", ny);
+      glowRing.setAttribute("r", 44);
+      glowRing.setAttribute("fill", "none");
+      glowRing.setAttribute("stroke", ch.color);
+      glowRing.setAttribute("stroke-width", "1");
+      glowRing.setAttribute("stroke-opacity", "0.15");
+      g.appendChild(glowRing);
 
       const circle = createSVGElement("circle");
       circle.setAttribute("cx", nx);
       circle.setAttribute("cy", ny);
-      circle.setAttribute("r", 30);
-      circle.setAttribute("fill", "#1e293b");
+      circle.setAttribute("r", 38);
+      circle.setAttribute("fill", "#111827");
       circle.setAttribute("stroke", ch.color);
       circle.setAttribute("stroke-width", "2.5");
       g.appendChild(circle);
 
-      // Chapter number
-      const numText = createSVGElement("text");
-      numText.setAttribute("x", nx);
-      numText.setAttribute("y", ny - 5);
-      numText.setAttribute("text-anchor", "middle");
-      numText.setAttribute("fill", ch.color);
-      numText.setAttribute("font-size", "10");
-      numText.setAttribute("font-weight", "800");
-      numText.textContent = `CH ${ch.id}`;
-      g.appendChild(numText);
+      // Chapter number text
+      const numTxt = createSVGElement("text");
+      numTxt.setAttribute("x", nx);
+      numTxt.setAttribute("y", ny - 7);
+      numTxt.setAttribute("text-anchor", "middle");
+      numTxt.setAttribute("fill", ch.color);
+      numTxt.setAttribute("font-size", "12");
+      numTxt.setAttribute("font-weight", "800");
+      numTxt.setAttribute("font-family", "Outfit, sans-serif");
+      numTxt.textContent = `CH ${ch.id}`;
+      g.appendChild(numTxt);
 
-      // Short label
-      const shortTitle = ch.title
-        .replace(/^Chapter \d+:\s*/, "")
-        .split(" ")
-        .slice(0, 2)
-        .join(" ");
-      const labelText = createSVGElement("text");
-      labelText.setAttribute("x", nx);
-      labelText.setAttribute("y", ny + 8);
-      labelText.setAttribute("text-anchor", "middle");
-      labelText.setAttribute("fill", "#cbd5e1");
-      labelText.setAttribute("font-size", "8");
-      labelText.setAttribute("font-weight", "500");
-      labelText.textContent = shortTitle;
-      g.appendChild(labelText);
+      // Short title
+      const shortTitle = ch.title.replace(/^Chapter \d+:\s*/, "").split(" ").slice(0, 2).join(" ");
+      const labelTxt = createSVGElement("text");
+      labelTxt.setAttribute("x", nx);
+      labelTxt.setAttribute("y", ny + 10);
+      labelTxt.setAttribute("text-anchor", "middle");
+      labelTxt.setAttribute("fill", "#cbd5e1");
+      labelTxt.setAttribute("font-size", "10");
+      labelTxt.setAttribute("font-weight", "500");
+      labelTxt.setAttribute("font-family", "Outfit, sans-serif");
+      labelTxt.textContent = shortTitle;
+      g.appendChild(labelTxt);
 
-      // Learned indicator
+      // Learned badge
       if (progress[ch.id]) {
-        const checkCircle = createSVGElement("circle");
-        checkCircle.setAttribute("cx", nx + 20);
-        checkCircle.setAttribute("cy", ny - 20);
-        checkCircle.setAttribute("r", 7);
-        checkCircle.setAttribute("fill", "#10b981");
-        g.appendChild(checkCircle);
-        const checkMark = createSVGElement("text");
-        checkMark.setAttribute("x", nx + 20);
-        checkMark.setAttribute("y", ny - 16);
-        checkMark.setAttribute("text-anchor", "middle");
-        checkMark.setAttribute("fill", "#fff");
-        checkMark.setAttribute("font-size", "9");
-        checkMark.setAttribute("font-weight", "bold");
-        checkMark.textContent = "✓";
-        g.appendChild(checkMark);
+        const bg = createSVGElement("circle");
+        bg.setAttribute("cx", nx + 28);
+        bg.setAttribute("cy", ny - 28);
+        bg.setAttribute("r", 9);
+        bg.setAttribute("fill", "#10b981");
+        g.appendChild(bg);
+        const checkTxt = createSVGElement("text");
+        checkTxt.setAttribute("x", nx + 28);
+        checkTxt.setAttribute("y", ny - 24);
+        checkTxt.setAttribute("text-anchor", "middle");
+        checkTxt.setAttribute("fill", "#fff");
+        checkTxt.setAttribute("font-size", "11");
+        checkTxt.setAttribute("font-weight", "bold");
+        checkTxt.textContent = "✓";
+        g.appendChild(checkTxt);
       }
 
-      g.addEventListener("click", () => openChapter(ch.id));
+      // ---- Click handler: expand sub-branches + show popup ----
+      g.addEventListener("click", (e) => {
+        e.stopPropagation();
+        expandChapter(ch, nx, ny, angle);
+      });
+
       svg.appendChild(g);
     });
+
+    // Store positions for later
+    svg._chapterPositions = chapterPositions;
+
+    // Create a group for sub-branches (drawn above edges but below nodes)
+    mapState.subBranchGroup = createSVGElement("g");
+    mapState.subBranchGroup.setAttribute("id", "sub-branches");
+    svg.appendChild(mapState.subBranchGroup);
+  }
+
+  function expandChapter(ch, nx, ny, angle) {
+    const svg = $("#mindmap-svg");
+    const container = $("#mindmap-container");
+
+    // Clear previous sub-branches
+    const sbGroup = $("#sub-branches");
+    if (sbGroup) sbGroup.innerHTML = "";
+
+    // Remove old popup
+    const oldPopup = container.querySelector(".mindmap-detail-popup");
+    if (oldPopup) oldPopup.remove();
+
+    // If clicking the same chapter, collapse
+    if (mapState.expandedChapterId === ch.id) {
+      mapState.expandedChapterId = null;
+      return;
+    }
+    mapState.expandedChapterId = ch.id;
+
+    // ---- Draw sub-branch concept nodes in SVG ----
+    const concepts = ch.concepts;
+    const subRadius = 140;
+    const spreadAngle = Math.PI * 0.7; // fan out ~126 degrees
+    const startAngle = angle - spreadAngle / 2;
+
+    concepts.forEach((concept, ci) => {
+      const subAngle = concepts.length === 1 ? angle : startAngle + (spreadAngle * ci) / (concepts.length - 1);
+      const sx = nx + subRadius * Math.cos(subAngle);
+      const sy = ny + subRadius * Math.sin(subAngle);
+
+      // Branch line
+      const line = createSVGElement("line");
+      line.setAttribute("x1", nx);
+      line.setAttribute("y1", ny);
+      line.setAttribute("x2", sx);
+      line.setAttribute("y2", sy);
+      line.setAttribute("stroke", ch.color);
+      line.setAttribute("stroke-width", "1.5");
+      line.setAttribute("stroke-opacity", "0.5");
+      line.setAttribute("class", "map-sub-branch");
+      sbGroup.appendChild(line);
+
+      // Sub-node (rounded rect)
+      const g = createSVGElement("g");
+      g.setAttribute("class", "map-sub-node");
+
+      // Truncate concept name
+      const name = concept.name.length > 28 ? concept.name.slice(0, 26) + "…" : concept.name;
+      const textWidth = Math.max(name.length * 6.5, 100);
+      const rectW = textWidth + 24;
+      const rectH = 28;
+
+      const rect = createSVGElement("rect");
+      rect.setAttribute("x", sx - rectW / 2);
+      rect.setAttribute("y", sy - rectH / 2);
+      rect.setAttribute("width", rectW);
+      rect.setAttribute("height", rectH);
+      rect.setAttribute("rx", 8);
+      rect.setAttribute("ry", 8);
+      rect.setAttribute("fill", "rgba(17, 24, 39, 0.9)");
+      rect.setAttribute("stroke", ch.color);
+      rect.setAttribute("stroke-width", "1.5");
+      rect.setAttribute("stroke-opacity", "0.5");
+      g.appendChild(rect);
+
+      const text = createSVGElement("text");
+      text.setAttribute("x", sx);
+      text.setAttribute("y", sy + 4);
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("fill", "#e2e8f0");
+      text.setAttribute("font-size", "10");
+      text.setAttribute("font-weight", "500");
+      text.setAttribute("font-family", "Outfit, sans-serif");
+      text.textContent = name;
+      g.appendChild(text);
+
+      sbGroup.appendChild(g);
+    });
+
+    // ---- Show HTML Detail Popup ----
+    const popup = document.createElement("div");
+    popup.className = "mindmap-detail-popup";
+    popup.style.setProperty("--popup-accent", ch.color);
+
+    // Position popup near the node (accounting for pan/zoom)
+    // We calculate position in container-relative coordinates
+    const containerRect = container.getBoundingClientRect();
+    let popupLeft = (nx * mapState.zoom) + mapState.panX + 50;
+    let popupTop = (ny * mapState.zoom) + mapState.panY - 100;
+
+    // Keep popup inside container
+    if (popupLeft + 400 > containerRect.width) {
+      popupLeft = (nx * mapState.zoom) + mapState.panX - 430;
+    }
+    if (popupTop < 10) popupTop = 10;
+    if (popupTop + 460 > containerRect.height) popupTop = containerRect.height - 470;
+
+    popup.style.left = popupLeft + "px";
+    popup.style.top = popupTop + "px";
+
+    let conceptsHTML = ch.concepts.map(c => `
+      <div class="popup-concept-item">
+        <div class="popup-concept-name">📌 ${c.name}</div>
+      </div>
+    `).join("");
+
+    popup.innerHTML = `
+      <button class="popup-close" title="Đóng">✕</button>
+      <div class="popup-chapter-num" style="color:${ch.color};">Chapter ${ch.id}</div>
+      <div class="popup-title">${ch.title.replace(/^Chapter \d+:\s*/, "")}</div>
+      <div class="popup-subtitle">${ch.subtitle}</div>
+      <div class="popup-concepts">
+        ${conceptsHTML}
+      </div>
+      <button class="btn-try-it" style="--popup-accent:${ch.color};">
+        🧪 Try it – Xem Mô phỏng & Code
+      </button>
+    `;
+
+    container.appendChild(popup);
+
+    // Close button
+    popup.querySelector(".popup-close").addEventListener("click", (e) => {
+      e.stopPropagation();
+      popup.remove();
+      if (sbGroup) sbGroup.innerHTML = "";
+      mapState.expandedChapterId = null;
+    });
+
+    // Try it button -> navigate to workspace
+    popup.querySelector(".btn-try-it").addEventListener("click", (e) => {
+      e.stopPropagation();
+      popup.remove();
+      if (sbGroup) sbGroup.innerHTML = "";
+      mapState.expandedChapterId = null;
+      openChapter(ch.id);
+    });
+
+    // Close popup when clicking outside
+    const closeHandler = (e) => {
+      if (!popup.contains(e.target) && !e.target.closest(`[data-chapter-id="${ch.id}"]`)) {
+        popup.remove();
+        if (sbGroup) sbGroup.innerHTML = "";
+        mapState.expandedChapterId = null;
+        container.removeEventListener("mousedown", closeHandler);
+      }
+    };
+    setTimeout(() => container.addEventListener("mousedown", closeHandler), 100);
   }
 
   function createSVGElement(tag) {
