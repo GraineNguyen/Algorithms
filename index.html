@@ -9,38 +9,39 @@
 </head>
 <body>
 
+  <!-- Aquarium dynamic background -->
+  <canvas id="aquarium-canvas"></canvas>
+  <div class="aquarium-vignette"></div>
+
   <div class="app-container">
 
     <!-- ======= Header ======= -->
     <header>
       <div class="logo-section">
         <h1>📘 Grokking Algorithms</h1>
-        <p>Interactive Explorer – Khám phá thuật toán từng phần nhỏ</p>
+        <p id="app-subtitle">Interactive Explorer – Khám phá thuật toán từng phần nhỏ</p>
       </div>
 
       <div class="header-controls">
         <!-- Navigation Tabs -->
         <nav class="nav-tabs">
-          <button class="nav-tab active" data-view="dashboard">📊 Dashboard</button>
-          <button class="nav-tab" data-view="mindmap">🗺️ Mind Map</button>
+          <button class="nav-tab active" data-view="dashboard" id="tab-dash-btn">📊 Dashboard</button>
+          <button class="nav-tab" data-view="mindmap" id="tab-map-btn">🗺️ Mind Map</button>
         </nav>
 
         <!-- Search -->
         <div class="search-wrapper">
           <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" placeholder="Tìm khái niệm... (Big O, Hash, BFS...)">
+          <input type="text" class="search-input" id="search-input-box" placeholder="Tìm khái niệm... (Big O, Hash, BFS...)">
+        </div>
+
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+          <button class="lang-btn active" data-lang="vi">VI</button>
+          <button class="lang-btn" data-lang="en">EN</button>
         </div>
       </div>
     </header>
-
-    <!-- ======= Progress Bar ======= -->
-    <div style="margin-bottom: 25px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 18px; display: flex; align-items: center; gap: 15px;">
-      <span style="font-size: 13px; font-weight: 600; white-space: nowrap;">📈 Tiến trình học:</span>
-      <div style="flex-grow: 1; background: rgba(255,255,255,0.06); border-radius: 20px; height: 10px; overflow: hidden;">
-        <div id="progress-bar-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 20px; transition: width 0.5s ease;"></div>
-      </div>
-      <span id="progress-label" style="font-size: 12px; color: #94a3b8; white-space: nowrap;">0/13 chương (0%)</span>
-    </div>
 
     <!-- ======= Dashboard View (Chapter Grid) ======= -->
     <div class="dashboard-view">
@@ -65,9 +66,15 @@
       <!-- Rendered by app.js -->
     </div>
 
+    <!-- ======= Footer ======= -->
+    <footer class="app-footer">
+      <p>Nguyễn Hữu Nhân - Terralogic (Graine Nguyen)</p>
+    </footer>
+
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="data.js"></script>
   <script src="simulators.js"></script>
   <script src="app.js"></script>

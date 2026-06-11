@@ -5,20 +5,20 @@ window.GrokkingSimulators = {
     init: function(container) {
       container.innerHTML = `
         <div class="sim-wrapper">
-          <h3>Mô phỏng Tìm kiếm nhị phân (Binary Search)</h3>
-          <p class="sim-desc">Nhập số cần tìm hoặc chọn ngẫu nhiên một số từ mảng. Nhấn nút "Bước tiếp" để xem thuật toán thu hẹp phạm vi tìm kiếm.</p>
+          <h3>${t("simBS_title")}</h3>
+          <p class="sim-desc">${t("simBS_desc")}</p>
           
           <div class="sim-controls">
-            <label>Số cần tìm: </label>
+            <label>${t("simBS_target")}</label>
             <input type="number" id="bs-target" value="47" min="10" max="99" style="width: 60px;">
-            <button id="bs-btn-start" class="btn btn-primary">Khởi tạo lại</button>
-            <button id="bs-btn-step" class="btn btn-accent">Bước tiếp (Step)</button>
+            <button id="bs-btn-start" class="btn btn-primary">${t("simBS_btnInit")}</button>
+            <button id="bs-btn-step" class="btn btn-accent">${t("simBS_btnStep")}</button>
           </div>
 
           <div id="bs-array-container" class="array-visualizer"></div>
           
           <div id="bs-status" class="sim-status-box">
-            <strong>Trạng thái:</strong> Nhấn "Bước tiếp" để bắt đầu tìm kiếm.
+            ${t("simBS_statusInit")}
           </div>
         </div>
       `;
@@ -86,10 +86,8 @@ window.GrokkingSimulators = {
         stepCount = 0;
         found = false;
         finished = false;
-        document.getElementById("bs-status").innerHTML = `
-          <strong>Trạng thái:</strong> Bắt đầu tìm kiếm số <strong>${target}</strong> trong mảng 14 phần tử.<br>
-          Phạm vi tìm kiếm hiện tại: từ chỉ số <strong>${low}</strong> đến <strong>${high}</strong> (toàn bộ mảng).
-        `;
+        
+        document.getElementById("bs-status").innerHTML = t("simBS_statusStart", { target, low, high });
         renderArray();
       }
 
@@ -98,10 +96,7 @@ window.GrokkingSimulators = {
         
         stepCount++;
         if (low > high) {
-          document.getElementById("bs-status").innerHTML = `
-            <strong>Kết quả:</strong> Không tìm thấy giá trị <strong>${target}</strong> trong mảng!<br>
-            Thuật toán kết thúc sau <strong>${stepCount}</strong> bước vì <code>low > high</code>.
-          `;
+          document.getElementById("bs-status").innerHTML = t("simBS_statusNotFound", { target, stepCount });
           finished = true;
           renderArray();
           return;
@@ -114,27 +109,14 @@ window.GrokkingSimulators = {
         if (guess === target) {
           found = true;
           finished = true;
-          document.getElementById("bs-status").innerHTML = `
-            <strong style="color:#10b981;">Tìm thấy!</strong> Số <strong>${target}</strong> nằm ở chỉ số <strong>${mid}</strong>.<br>
-            Hoàn thành trong <strong>${stepCount}</strong> bước bước so sánh!
-          `;
+          document.getElementById("bs-status").innerHTML = t("simBS_statusFound", { target, mid, stepCount });
           renderArray();
         } else if (guess > target) {
-          document.getElementById("bs-status").innerHTML = `
-            <strong>Bước ${stepCount}:</strong> 
-            So sánh phần tử giữa <code>mid = ${mid}</code> (giá trị <code>${guess}</code>) với target <code>${target}</code>.<br>
-            Vì <code>${guess} > ${target}</code>, target nằm ở nửa bên trái. 
-            Cập nhật <code>high = mid - 1 = ${mid - 1}</code>.
-          `;
           high = mid - 1;
+          document.getElementById("bs-status").innerHTML = t("simBS_statusStepLeft", { stepCount, mid, guess, target, high });
         } else {
-          document.getElementById("bs-status").innerHTML = `
-            <strong>Bước ${stepCount}:</strong> 
-            So sánh phần tử giữa <code>mid = ${mid}</code> (giá trị <code>${guess}</code>) với target <code>${target}</code>.<br>
-            Vì <code>${guess} < ${target}</code>, target nằm ở nửa bên phải. 
-            Cập nhật <code>low = mid + 1 = ${mid + 1}</code>.
-          `;
           low = mid + 1;
+          document.getElementById("bs-status").innerHTML = t("simBS_statusStepRight", { stepCount, mid, guess, target, low });
         }
       }
 
@@ -150,41 +132,41 @@ window.GrokkingSimulators = {
     init: function(container) {
       container.innerHTML = `
         <div class="sim-wrapper">
-          <h3>Mô phỏng Mảng vs Danh sách liên kết & Sắp xếp chọn</h3>
+          <h3>${t("simSS_title")}</h3>
           
           <div class="tabs-control">
-            <button id="tab-mem" class="tab-btn active">Bộ nhớ (Mảng vs DS liên kết)</button>
-            <button id="tab-sort" class="tab-btn">Sắp xếp chọn (Selection Sort)</button>
+            <button id="tab-mem" class="tab-btn active">${t("simSS_tabMemory")}</button>
+            <button id="tab-sort" class="tab-btn">${t("simSS_tabSort")}</button>
           </div>
 
           <div id="sim-mem-view" class="tab-content active">
-            <p class="sim-desc"><strong>Mảng (Array):</strong> Các phần tử xếp liền kề nhau. Truy cập ngẫu nhiên <code>O(1)</code> bằng cách cộng chỉ số. Thêm/Xóa chậm vì phải dịch chuyển.</p>
+            <p class="sim-desc">${t("simSS_descArray")}</p>
             <div class="memory-grid" id="array-mem-grid"></div>
 
-            <p class="sim-desc" style="margin-top:20px;"><strong>Danh sách liên kết (Linked List):</strong> Các phần tử nằm rải rác. Mỗi phần tử trỏ tới phần tử tiếp theo. Thêm/Xóa <code>O(1)</code> bằng cách sửa con trỏ. Truy cập ngẫu nhiên chậm <code>O(n)</code>.</p>
+            <p class="sim-desc" style="margin-top:20px;">${t("simSS_descList")}</p>
             <div class="memory-grid" id="list-mem-grid"></div>
           </div>
 
           <div id="sim-sort-view" class="tab-content">
-            <p class="sim-desc">Bấm "Bước tiếp" để thuật toán tìm phần tử nhỏ nhất trong mảng chưa sắp xếp, loại bỏ nó và đẩy sang mảng kết quả.</p>
+            <p class="sim-desc">${t("simSS_descSort")}</p>
             <div class="sim-controls">
-              <button id="ss-btn-reset" class="btn btn-primary">Khởi tạo lại</button>
-              <button id="ss-btn-step" class="btn btn-accent">Bước tiếp (Step)</button>
+              <button id="ss-btn-reset" class="btn btn-primary">${t("simBS_btnInit")}</button>
+              <button id="ss-btn-step" class="btn btn-accent">${t("simBS_btnStep")}</button>
             </div>
             
             <div class="sort-visualizer-container">
               <div>
-                <h5>Mảng chưa sắp xếp:</h5>
+                <h5>${t("simSS_btnUnsorted")}</h5>
                 <div id="ss-unsorted" class="array-visualizer"></div>
               </div>
               <div style="margin-top:20px;">
-                <h5>Mảng đã sắp xếp:</h5>
+                <h5>${t("simSS_btnSorted")}</h5>
                 <div id="ss-sorted" class="array-visualizer" style="min-height:50px;"></div>
               </div>
             </div>
 
             <div id="ss-status" class="sim-status-box" style="margin-top:15px;">
-              <strong>Trạng thái:</strong> Bấm "Bước tiếp" để bắt đầu sắp xếp chọn.
+              ${t("simSS_statusInit")}
             </div>
           </div>
         </div>
@@ -221,15 +203,15 @@ window.GrokkingSimulators = {
             cell.innerHTML = `<div>[${i-2}]</div><div style="font-size:11px;font-weight:bold;color:#f97316;">S:${i+10}</div>`;
           } else {
             cell.className = "mem-cell mem-empty";
-            cell.innerText = "Trống";
+            cell.innerText = t("simSS_empty");
           }
           arrGrid.appendChild(cell);
         }
 
         // Linked list: scattered slots
-        const listPositions = [1, 6, 3, 5]; // Node index in list: 0->1, 1->6, 2->3, 3->5
+        const listPositions = [1, 6, 3, 5]; 
         const listValues = ["A", "B", "C", "D"];
-        const nextPtr = [3, 5, 6, -1]; // A(slot 1) points to C(slot 3), C points to B(slot 6), B points to D(slot 5), D points to null(-1)
+        const nextPtr = [3, 5, 6, -1]; 
         
         for (let i = 0; i < 8; i++) {
           const cell = document.createElement("div");
@@ -242,7 +224,7 @@ window.GrokkingSimulators = {
             cell.innerHTML = `<div style="font-weight:bold;color:#a855f7;">${listValues[listIdx]}</div><div style="font-size:9px;opacity:0.8;">Next: ${nextText}</div>`;
           } else {
             cell.className = "mem-cell mem-empty";
-            cell.innerText = "Trống";
+            cell.innerText = t("simSS_empty");
           }
           listGrid.appendChild(cell);
         }
@@ -256,7 +238,7 @@ window.GrokkingSimulators = {
       let sorted = [];
       let currentSmallestIdx = -1;
       let checkIdx = -1;
-      let state = "search"; // "search" or "move"
+      let state = "search"; 
 
       function renderSortVisualizer() {
         const unsortedDiv = document.getElementById("ss-unsorted");
@@ -291,54 +273,44 @@ window.GrokkingSimulators = {
         currentSmallestIdx = -1;
         checkIdx = -1;
         state = "search";
-        document.getElementById("ss-status").innerHTML = `
-          <strong>Trạng thái:</strong> Bắt đầu sắp xếp mảng <code>[${originalArray.join(", ")}]</code>. <br>Bấm "Bước tiếp" để tìm phần tử nhỏ nhất.
-        `;
+        document.getElementById("ss-status").innerHTML = t("simSS_statusStart", { array: originalArray.join(", ") });
         renderSortVisualizer();
       }
 
       function stepSort() {
         if (unsorted.length === 0) {
-          document.getElementById("ss-status").innerHTML = `
-            <strong style="color:#10b981;">Hoàn thành!</strong> Mảng đã được sắp xếp tăng dần: <code>[${sorted.join(", ")}]</code>.
-          `;
+          document.getElementById("ss-status").innerHTML = t("simSS_statusCompleted", { array: sorted.join(", ") });
           return;
         }
 
         if (state === "search") {
           if (checkIdx === -1) {
-            // Start searching smallest
             currentSmallestIdx = 0;
             checkIdx = 1;
-            document.getElementById("ss-status").innerHTML = `
-              <strong>Đang tìm kiếm:</strong> Khởi tạo phần tử nhỏ nhất là <code>${unsorted[0]}</code> ở chỉ số 0. So sánh với các phần tử tiếp theo...
-            `;
+            document.getElementById("ss-status").innerHTML = t("simSS_statusSearching", { smallest: unsorted[0] });
           } else if (checkIdx < unsorted.length) {
             if (unsorted[checkIdx] < unsorted[currentSmallestIdx]) {
-              document.getElementById("ss-status").innerHTML = `
-                So sánh <code>${unsorted[checkIdx]}</code> với phần tử nhỏ nhất hiện tại là <code>${unsorted[currentSmallestIdx]}</code>.<br>
-                Vì <code>${unsorted[checkIdx]} < ${unsorted[currentSmallestIdx]}</code>, cập nhật phần tử nhỏ nhất là <code>${unsorted[checkIdx]}</code> (chỉ số <code>${checkIdx}</code>).
-              `;
+              document.getElementById("ss-status").innerHTML = t("simSS_statusFoundNew", {
+                guess: unsorted[checkIdx],
+                smallest: unsorted[currentSmallestIdx],
+                idx: checkIdx
+              });
               currentSmallestIdx = checkIdx;
             } else {
-              document.getElementById("ss-status").innerHTML = `
-                So sánh <code>${unsorted[checkIdx]}</code> với phần tử nhỏ nhất hiện tại là <code>${unsorted[currentSmallestIdx]}</code>.<br>
-                Vì lớn hơn hoặc bằng, giữ nguyên.
-              `;
+              document.getElementById("ss-status").innerHTML = t("simSS_statusKeep", {
+                guess: unsorted[checkIdx],
+                smallest: unsorted[currentSmallestIdx]
+              });
             }
             checkIdx++;
           }
 
           if (checkIdx >= unsorted.length) {
-            // Finished searching for this round
             state = "move";
           }
         } else if (state === "move") {
           const val = unsorted[currentSmallestIdx];
-          document.getElementById("ss-status").innerHTML = `
-            <strong>Di chuyển:</strong> Phần tử nhỏ nhất tìm được là <code>${val}</code>.<br>
-            Loại bỏ khỏi mảng chưa sắp xếp và đẩy vào cuối mảng kết quả.
-          `;
+          document.getElementById("ss-status").innerHTML = t("simSS_statusMove", { val });
           sorted.push(val);
           unsorted.splice(currentSmallestIdx, 1);
           currentSmallestIdx = -1;
@@ -359,25 +331,24 @@ window.GrokkingSimulators = {
     init: function(container) {
       container.innerHTML = `
         <div class="sim-wrapper">
-          <h3>Mô phỏng Ngăn xếp Đệ quy (Recursion Call Stack)</h3>
-          <p class="sim-desc">Tính toán Giai thừa của 4: <code>factorial(4) = 4 * 3 * 2 * 1 = 24</code>.<br>
-          Bấm "Bước tiếp" để xem các tầng hàm được đẩy vào (Push) và lấy ra (Pop) khỏi Ngăn xếp cuộc gọi.</p>
+          <h3>${t("simRec_title")}</h3>
+          <p class="sim-desc">${t("simRec_desc")}</p>
 
           <div class="sim-controls">
-            <button id="rec-btn-reset" class="btn btn-primary">Khởi tạo lại</button>
-            <button id="rec-btn-step" class="btn btn-accent">Bước tiếp (Step)</button>
+            <button id="rec-btn-reset" class="btn btn-primary">${t("simBS_btnInit")}</button>
+            <button id="rec-btn-step" class="btn btn-accent">${t("simBS_btnStep")}</button>
           </div>
 
           <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 250px;">
-              <h5>Ngăn xếp Cuộc gọi (Call Stack):</h5>
+              <h5>${t("simRec_stackTitle")}</h5>
               <div id="rec-stack" class="stack-visualizer"></div>
             </div>
             
             <div style="flex: 1; min-width: 250px;">
-              <h5>Bảng biến trạng thái:</h5>
+              <h5>${t("simRec_varsTitle")}</h5>
               <div id="rec-status" class="sim-status-box" style="height: calc(100% - 30px); display: flex; align-items: center; justify-content: center; text-align: left;">
-                Nhấn "Bước tiếp" để bắt đầu thực thi factorial(4).
+                ${t("simRec_statusInit")}
               </div>
             </div>
           </div>
@@ -386,7 +357,7 @@ window.GrokkingSimulators = {
 
       let stack = [];
       let currentVal = 4;
-      let phase = "push"; // "push" or "pop"
+      let phase = "push"; 
       let result = 1;
       let step = 0;
 
@@ -395,20 +366,19 @@ window.GrokkingSimulators = {
         stackDiv.innerHTML = "";
         
         if (stack.length === 0) {
-          stackDiv.innerHTML = `<div style="text-align:center; padding: 20px; color:#555;">[Ngăn xếp rỗng]</div>`;
+          stackDiv.innerHTML = `<div style="text-align:center; padding: 20px; color:#555;">[Empty]</div>`;
           return;
         }
 
-        // Draw from top to bottom (LIFO style, so latest on top)
+        // Draw LIFO style (latest on top)
         for (let i = stack.length - 1; i >= 0; i--) {
           const frame = document.createElement("div");
           frame.className = "stack-frame";
           frame.innerHTML = `
             <div class="frame-title">${stack[i].name}</div>
-            <div class="frame-vars">Biến x = ${stack[i].x}</div>
-            ${stack[i].retVal !== undefined ? `<div class="frame-ret">Trả về = ${stack[i].retVal}</div>` : ""}
+            <div class="frame-vars">x = ${stack[i].x}</div>
+            ${stack[i].retVal !== undefined ? `<div class="frame-ret">Return = ${stack[i].retVal}</div>` : ""}
           `;
-          // Highlight top element
           if (i === stack.length - 1) {
             frame.classList.add("frame-top");
           }
@@ -422,10 +392,7 @@ window.GrokkingSimulators = {
         phase = "push";
         result = 1;
         step = 0;
-        document.getElementById("rec-status").innerHTML = `
-          <strong>Trạng thái ban đầu:</strong><br>
-          Lệnh gọi đầu tiên: <code>factorial(4)</code>. <br>Hệ thống bắt đầu tạo khung ngăn xếp cho hàm này.
-        `;
+        document.getElementById("rec-status").innerHTML = t("simRec_statusStart");
         renderStack();
       }
 
@@ -438,26 +405,15 @@ window.GrokkingSimulators = {
               name: `factorial(${currentVal})`,
               x: currentVal
             });
-            document.getElementById("rec-status").innerHTML = `
-              <strong>Bước ${step} (Đệ quy đi xuống - PUSH):</strong><br>
-              Gọi hàm <code>factorial(${currentVal})</code>. <br>
-              Vì <code>x > 1</code>, chương trình chạy vào nhánh <em>Recursive Case</em> và gọi tiếp <code>factorial(${currentVal - 1})</code>.<br>
-              Một khung ngăn xếp mới được thêm (push) vào đỉnh của Call Stack.
-            `;
+            document.getElementById("rec-status").innerHTML = t("simRec_statusPush", { step, val: currentVal, nextVal: currentVal - 1 });
             currentVal--;
           } else {
-            // Reach base case
             stack.push({
               name: `factorial(1)`,
               x: 1,
               retVal: 1
             });
-            document.getElementById("rec-status").innerHTML = `
-              <strong>Bước ${step} (Đạt Base Case - PUSH):</strong><br>
-              Gọi hàm <code>factorial(1)</code>. <br>
-              Vì <code>x == 1</code>, điều kiện dừng (Base Case) được thỏa mãn. Hàm trả về ngay kết quả <strong>1</strong> mà không gọi đệ quy tiếp.<br>
-              Ngăn xếp đạt độ sâu tối đa. Từ bước sau sẽ bắt đầu quy trình rút gọn ngăn xếp (Pop).
-            `;
+            document.getElementById("rec-status").innerHTML = t("simRec_statusBaseCase", { step });
             phase = "pop";
           }
         } else if (phase === "pop") {
@@ -469,20 +425,15 @@ window.GrokkingSimulators = {
               result = result * nextFrame.x;
               nextFrame.retVal = result;
               
-              document.getElementById("rec-status").innerHTML = `
-                <strong>Bước ${step} (Quay lui giải phóng - POP):</strong><br>
-                Hàm <code>${topFrame.name}</code> đã hoàn thành và trả về giá trị <strong>${prevResult}</strong>. Nó bị lấy ra (pop) khỏi ngăn xếp.<br>
-                Dữ liệu trả về được nhân vào tham số của hàm nằm dưới: <code>factorial(${nextFrame.x})</code>.<br>
-                Kết quả tích lũy: <code>${prevResult} * ${nextFrame.x} = ${result}</code>.
-              `;
+              document.getElementById("rec-status").innerHTML = t("simRec_statusPop", {
+                step,
+                topFrame: topFrame.name,
+                prevResult,
+                nextFrameX: nextFrame.x,
+                result
+              });
             } else {
-              // Final pop
-              document.getElementById("rec-status").innerHTML = `
-                <strong>Bước ${step} (Hoàn thành - POP):</strong><br>
-                Hàm cuối cùng <code>factorial(4)</code> được giải phóng.<br>
-                Kết quả cuối cùng thu được là: <strong style="font-size: 18px; color: #10b981;">${result}</strong>.<br>
-                Call Stack trống hoàn toàn.
-              `;
+              document.getElementById("rec-status").innerHTML = t("simRec_statusCompleted", { step, result });
             }
           }
         }
@@ -501,27 +452,26 @@ window.GrokkingSimulators = {
     init: function(container) {
       container.innerHTML = `
         <div class="sim-wrapper">
-          <h3>Mô phỏng Bảng băm & Va chạm (Hash Collisions)</h3>
-          <p class="sim-desc">Nhập khóa (key) và giá trị (value) để chèn vào Bảng băm kích thước N=8.<br>
-          Hàm băm đơn giản: <code>Index = (Tổng mã ASCII của ký tự) % 8</code>. Nếu 2 key trùng Index sẽ tạo ra <strong>Danh sách liên kết (Collision)</strong>.</p>
+          <h3>${t("simHash_title")}</h3>
+          <p class="sim-desc">${t("simHash_desc")}</p>
           
           <div class="sim-controls">
-            <input type="text" id="hash-key" placeholder="Key (ví dụ: apple)" style="width: 130px;">
-            <input type="text" id="hash-val" placeholder="Value (ví dụ: 15$)" style="width: 110px;">
-            <button id="hash-btn-insert" class="btn btn-accent">Chèn dữ liệu</button>
-            <button id="hash-btn-clear" class="btn btn-primary">Xóa bảng</button>
+            <input type="text" id="hash-key" placeholder="Key (e.g. apple)" style="width: 130px;">
+            <input type="text" id="hash-val" placeholder="Value (e.g. 15$)" style="width: 110px;">
+            <button id="hash-btn-insert" class="btn btn-accent">${t("simHash_btnInsert")}</button>
+            <button id="hash-btn-clear" class="btn btn-primary">${t("simHash_btnClear")}</button>
           </div>
 
           <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
             <div style="flex: 1.2; min-width: 280px;">
-              <h5>Cấu trúc lưu trữ (Bảng băm kích thước 8):</h5>
+              <h5>${t("simHash_tableTitle")}</h5>
               <div id="hash-table-visualizer" class="hash-table-visualizer"></div>
             </div>
             
             <div style="flex: 0.8; min-width: 220px;">
-              <h5>Công thức & Log hoạt động:</h5>
+              <h5>${t("simHash_logTitle")}</h5>
               <div id="hash-log" class="sim-status-box" style="height: calc(100% - 30px); font-size:13px; line-height: 1.5; overflow-y:auto; max-height:220px;">
-                Chưa có hoạt động. Nhập key và bấm chèn dữ liệu.
+                ${t("simHash_logInit")}
               </div>
             </div>
           </div>
@@ -538,18 +488,16 @@ window.GrokkingSimulators = {
           const row = document.createElement("div");
           row.className = "hash-row";
           
-          // Index cell
           const idxCell = document.createElement("div");
           idxCell.className = "hash-idx-cell";
           idxCell.innerText = `Index ${i}`;
           row.appendChild(idxCell);
 
-          // Value chain container
           const chainDiv = document.createElement("div");
           chainDiv.className = "hash-chain-container";
 
           if (table[i].length === 0) {
-            chainDiv.innerHTML = `<span class="hash-empty-slot">Trống</span>`;
+            chainDiv.innerHTML = `<span class="hash-empty-slot">${t("simSS_empty")}</span>`;
           } else {
             table[i].forEach((pair, cIdx) => {
               const node = document.createElement("div");
@@ -583,7 +531,7 @@ window.GrokkingSimulators = {
         return {
           index: index,
           sum: sum,
-          logText: `• Chữ '${key}': ${breakdown.join(" + ")} = tổng <strong>${sum}</strong>.<br>• Phép lấy dư: <code>${sum} % 8 = ${index}</code>.`
+          breakdown: breakdown
         };
       }
 
@@ -594,35 +542,35 @@ window.GrokkingSimulators = {
         const value = valInput.value.trim() || "1";
 
         if (!key) {
-          alert("Vui lòng nhập Key!");
+          alert(t("simHash_alertKey"));
           return;
         }
 
         const res = hashFunction(key);
         const index = res.index;
         
-        // Check if key already exists, replace value
         let existingIdx = table[index].findIndex(p => p.key === key);
         let statusText = "";
         
         if (existingIdx !== -1) {
           table[index][existingIdx].value = value;
-          statusText = `<span style="color:#f59e0b;">Cập nhật:</span> Key <strong>${key}</strong> đã tồn tại. Thay thế giá trị thành <strong>${value}</strong> tại index ${index}.`;
+          statusText = t("simHash_update", { key, value, index });
         } else {
           table[index].push({ key, value });
           if (table[index].length > 1) {
-            statusText = `<span style="color:#ef4444;">Va chạm (Collision)!</span> Index ${index} đã có dữ liệu. Đã thêm <strong>${key}</strong> vào cuối danh sách liên kết của index ${index}.`;
+            statusText = t("simHash_collision", { key, index });
           } else {
-            statusText = `<span style="color:#10b981;">Thành công:</span> Thêm cặp <code>${key}: ${value}</code> vào ô trống index ${index}.`;
+            statusText = t("simHash_success", { key, value, index });
           }
         }
 
-        document.getElementById("hash-log").innerHTML = `
-          <strong>Tính toán Hash:</strong><br>
-          ${res.logText}<br><br>
-          <strong>Hành động:</strong><br>
-          ${statusText}
-        `;
+        document.getElementById("hash-log").innerHTML = t("simHash_formula", {
+          key,
+          breakdown: res.breakdown.join(" + "),
+          sum: res.sum,
+          index,
+          statusText
+        });
 
         keyInput.value = "";
         valInput.value = "";
@@ -631,7 +579,7 @@ window.GrokkingSimulators = {
 
       function clearTable() {
         table = Array(8).fill(null).map(() => []);
-        document.getElementById("hash-log").innerText = "Đã dọn dẹp bảng băm.";
+        document.getElementById("hash-log").innerText = t("simHash_cleared");
         renderTable();
       }
 
@@ -647,46 +595,46 @@ window.GrokkingSimulators = {
     init: function(container) {
       container.innerHTML = `
         <div class="sim-wrapper">
-          <h3>Mô phỏng Tìm kiếm theo chiều rộng (Breadth-First Search)</h3>
-          <p class="sim-desc">Mục tiêu: Tìm người bán xoài (tên kết thúc bằng chữ <strong>'m'</strong>) xuất phát từ bạn (<strong>You</strong>). BFS đảm bảo tìm ra người bán xoài gần bạn nhất trong mạng lưới bạn bè.</p>
+          <h3>${t("simBfs_title")}</h3>
+          <p class="sim-desc">${t("simBfs_desc")}</p>
           
           <div class="sim-controls">
-            <button id="bfs-btn-reset" class="btn btn-primary">Khởi tạo lại</button>
-            <button id="bfs-btn-step" class="btn btn-accent">Bước tiếp (Step)</button>
+            <button id="bfs-btn-reset" class="btn btn-primary">${t("simBS_btnInit")}</button>
+            <button id="bfs-btn-step" class="btn btn-accent">${t("simBS_btnStep")}</button>
           </div>
 
           <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
             <div style="flex: 1.2; min-width: 280px; position:relative;">
-              <h5>Mạng lưới Bạn bè (Graph):</h5>
+              <h5>${t("simBfs_graphTitle")}</h5>
               <div id="bfs-graph-svg-container" style="background:#0f172a; border-radius: 8px; border:1px solid #1e293b; height: 280px;">
-                <svg id="bfs-svg" width="100%" height="100%" style="overflow: visible;"></svg>
+                <svg id="bfs-svg" viewBox="0 0 320 280" style="width: 100%; height: 100%; overflow: visible;"></svg>
               </div>
             </div>
             
             <div style="flex: 0.8; min-width: 220px;">
-              <h5>Hàng đợi BFS (Queue) & Trạng thái:</h5>
+              <h5>${t("simBfs_queueTitle")}</h5>
               <div style="margin-bottom: 10px;">
                 <strong>Queue (FIFO):</strong>
                 <div id="bfs-queue-visualizer" class="queue-visualizer"></div>
               </div>
               <div id="bfs-status" class="sim-status-box" style="height: 140px; overflow-y: auto; font-size: 13px;">
-                Nhấn "Bước tiếp" để bắt đầu đẩy bạn bè của bạn vào hàng đợi.
+                ${t("simBfs_statusInit")}
               </div>
             </div>
           </div>
         </div>
       `;
 
-      // Graph node layout positions
+      // Absolute node coordinates in a 320x280 viewbox
       const nodes = {
-        you: { x: 50, y: 140, label: "You", status: "unvisited" },
-        alice: { x: 150, y: 50, label: "Alice", status: "unvisited" },
-        bob: { x: 150, y: 140, label: "Bob", status: "unvisited" },
-        claire: { x: 150, y: 230, label: "Claire", status: "unvisited" },
-        peggy: { x: 270, y: 50, label: "Peggy", status: "unvisited" },
-        anuj: { x: 270, y: 120, label: "Anuj", status: "unvisited" },
-        thom: { x: 270, y: 200, label: "Thom", status: "unvisited" }, // Mango seller ('m' ends)
-        jonny: { x: 270, y: 260, label: "Jonny", status: "unvisited" }
+        you: { x: 40, y: 140, label: "You", status: "unvisited" },
+        alice: { x: 130, y: 50, label: "Alice", status: "unvisited" },
+        bob: { x: 130, y: 140, label: "Bob", status: "unvisited" },
+        claire: { x: 130, y: 230, label: "Claire", status: "unvisited" },
+        peggy: { x: 260, y: 50, label: "Peggy", status: "unvisited" },
+        anuj: { x: 260, y: 110, label: "Anuj", status: "unvisited" },
+        thom: { x: 260, y: 170, label: "Thom", status: "unvisited" }, 
+        jonny: { x: 260, y: 230, label: "Jonny", status: "unvisited" }
       };
 
       const edges = [
@@ -710,11 +658,9 @@ window.GrokkingSimulators = {
         const svg = document.getElementById("bfs-svg");
         svg.innerHTML = "";
 
-        // Render edges (lines with arrows)
-        // Set up marker arrow definition
         const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         defs.innerHTML = `
-          <marker id="arrow" viewBox="0 0 10 10" refX="20" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
           </marker>
         `;
@@ -724,9 +670,9 @@ window.GrokkingSimulators = {
           const fromNode = nodes[edge.from];
           const toNode = nodes[edge.to];
           const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          line.setAttribute("x1", `${fromNode.x}%`);
+          line.setAttribute("x1", fromNode.x);
           line.setAttribute("y1", fromNode.y);
-          line.setAttribute("x2", `${toNode.x}%`);
+          line.setAttribute("x2", toNode.x);
           line.setAttribute("y2", toNode.y);
           line.setAttribute("stroke", "#475569");
           line.setAttribute("stroke-width", "2");
@@ -734,48 +680,52 @@ window.GrokkingSimulators = {
           svg.appendChild(line);
         });
 
-        // Render nodes (circles)
+        // Render nodes
         Object.keys(nodes).forEach(key => {
           const node = nodes[key];
           const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
           const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          circle.setAttribute("cx", `${node.x}%`);
+          circle.setAttribute("cx", node.x);
           circle.setAttribute("cy", node.y);
-          circle.setAttribute("r", "20");
+          circle.setAttribute("r", "18");
           
-          // Color based on status
           let fillColor = "#1e293b";
           let strokeColor = "#64748b";
           if (node.status === "visiting") {
-            fillColor = "#0284c7"; // sky-600
+            fillColor = "#0284c7";
             strokeColor = "#38bdf8";
           } else if (node.status === "searched") {
             fillColor = "#334155";
             strokeColor = "#475569";
           } else if (node.status === "found") {
-            fillColor = "#16a34a"; // green-600
+            fillColor = "#16a34a";
             strokeColor = "#4ade80";
           }
           if (key === activeNode && node.status !== "found") {
-            fillColor = "#d97706"; // amber-600
+            fillColor = "#d97706";
             strokeColor = "#fbbf24";
           }
 
           circle.setAttribute("fill", fillColor);
           circle.setAttribute("stroke", strokeColor);
-          circle.setAttribute("stroke-width", "3");
+          circle.setAttribute("stroke-width", "2.5");
           g.appendChild(circle);
 
-          // Node Text Label
           const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          text.setAttribute("x", `${node.x}%`);
-          text.setAttribute("y", node.y + 5);
+          text.setAttribute("x", node.x);
+          text.setAttribute("y", node.y + 4);
           text.setAttribute("text-anchor", "middle");
           text.setAttribute("fill", "#fff");
-          text.setAttribute("font-size", "11px");
+          text.setAttribute("font-size", "10px");
           text.setAttribute("font-weight", "bold");
-          text.textContent = node.label;
+          
+          // Local translation for 'You' node label
+          let labelText = node.label;
+          if (labelText === "You" && currentLang === "vi") {
+            labelText = "Bạn";
+          }
+          text.textContent = labelText;
           g.appendChild(text);
 
           svg.appendChild(g);
@@ -787,14 +737,18 @@ window.GrokkingSimulators = {
         qDiv.innerHTML = "";
         
         if (queue.length === 0) {
-          qDiv.innerHTML = `<span style="font-size:12px;color:#475569;padding:5px;">Hàng đợi rỗng</span>`;
+          qDiv.innerHTML = `<span style="font-size:12px;color:#475569;padding:5px;">${t("simBfs_queueEmpty")}</span>`;
           return;
         }
 
         queue.forEach(item => {
           const qNode = document.createElement("div");
           qNode.className = "queue-item";
-          qNode.innerText = nodes[item].label;
+          let labelText = nodes[item].label;
+          if (labelText === "You" && currentLang === "vi") {
+            labelText = "Bạn";
+          }
+          qNode.innerText = labelText;
           qDiv.appendChild(qNode);
         });
       }
@@ -807,16 +761,12 @@ window.GrokkingSimulators = {
         activeNode = null;
         Object.keys(nodes).forEach(k => nodes[k].status = "unvisited");
         
-        // Start state
         nodes.you.status = "searched";
         searched.add("you");
         queue.push("alice", "bob", "claire");
         queue.forEach(n => nodes[n].status = "visiting");
 
-        document.getElementById("bfs-status").innerHTML = `
-          <strong>Trạng thái ban đầu:</strong><br>
-          Bạn được đánh dấu đã duyệt. Thêm bạn bè trực tiếp của bạn vào hàng đợi: <strong>Alice, Bob, Claire</strong>.
-        `;
+        document.getElementById("bfs-status").innerHTML = t("simBfs_statusStart");
         renderGraph();
         renderQueue();
       }
@@ -826,33 +776,24 @@ window.GrokkingSimulators = {
         stepCount++;
 
         if (queue.length === 0) {
-          document.getElementById("bfs-status").innerHTML = `
-            <strong>Kết quả:</strong> Đã duyệt toàn bộ đồ thị mà không tìm thấy người bán xoài nào!
-          `;
+          document.getElementById("bfs-status").innerHTML = t("simBfs_statusQueueEmptyResult");
           finished = true;
           return;
         }
 
-        // Pop from queue
         let current = queue.shift();
         activeNode = current;
         renderQueue();
 
         const person = nodes[current];
-        // Check if mango seller
         if (person.label.endsWith("m")) {
           person.status = "found";
           finished = true;
-          document.getElementById("bfs-status").innerHTML = `
-            <strong>Bước ${stepCount}:</strong> Lấy <strong>${person.label}</strong> ra khỏi hàng đợi.<br>
-            <span style="color:#10b981; font-weight:bold;">Tìm thấy người bán xoài!</span> Tên "${person.label}" kết thúc bằng chữ 'm'.<br>
-            Hoàn thành tìm kiếm!
-          `;
+          document.getElementById("bfs-status").innerHTML = t("simBfs_statusFound", { step: stepCount, label: person.label });
         } else {
           person.status = "searched";
           searched.add(current);
 
-          // Get neighbors
           let neighbors = [];
           if (current === "bob") neighbors = ["anuj", "peggy"];
           if (current === "alice") neighbors = ["peggy"];
@@ -867,11 +808,8 @@ window.GrokkingSimulators = {
             }
           });
 
-          let addedText = added.length > 0 ? `Thêm bạn bè của họ chưa duyệt vào hàng đợi: <strong>${added.join(", ")}</strong>` : "Không có bạn bè mới cần thêm.";
-          document.getElementById("bfs-status").innerHTML = `
-            <strong>Bước ${stepCount}:</strong> Lấy <strong>${person.label}</strong> ra khỏi hàng đợi và kiểm tra.<br>
-            Không phải người bán xoài. ${addedText}
-          `;
+          let addedText = added.length > 0 ? t("simBfs_addedFriend", { added: added.join(", ") }) : t("simBfs_noFriend");
+          document.getElementById("bfs-status").innerHTML = t("simBfs_statusChecked", { step: stepCount, label: person.label, addedText });
         }
 
         renderGraph();
@@ -890,49 +828,49 @@ window.GrokkingSimulators = {
     init: function(container) {
       container.innerHTML = `
         <div class="sim-wrapper">
-          <h3>Mô phỏng Thuật toán Dijkstra</h3>
-          <p class="sim-desc">Tìm đường đi ngắn nhất từ nút <strong>Start</strong> đến nút <strong>Fin</strong>. Cạnh có số thể hiện trọng số (chi phí).</p>
+          <h3>${t("simDj_title")}</h3>
+          <p class="sim-desc">${t("simDj_desc")}</p>
           
           <div class="sim-controls">
-            <button id="dj-btn-reset" class="btn btn-primary">Khởi tạo lại</button>
-            <button id="dj-btn-step" class="btn btn-accent">Bước tiếp (Step)</button>
+            <button id="dj-btn-reset" class="btn btn-primary">${t("simBS_btnInit")}</button>
+            <button id="dj-btn-step" class="btn btn-accent">${t("simBS_btnStep")}</button>
           </div>
 
           <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
             <div style="flex: 1.1; min-width: 280px;">
-              <h5>Đồ thị & Trọng số (SVG):</h5>
+              <h5>${t("simDj_graphTitle")}</h5>
               <div style="background:#0f172a; border-radius: 8px; border:1px solid #1e293b; height: 200px;">
-                <svg id="dj-svg" width="100%" height="100%" style="overflow: visible;"></svg>
+                <svg id="dj-svg" viewBox="0 0 320 200" style="width: 100%; height: 100%; overflow: visible;"></svg>
               </div>
             </div>
             
             <div style="flex: 0.9; min-width: 220px;">
-              <h5>Bảng chi phí (Costs Table):</h5>
+              <h5>${t("simDj_tableTitle")}</h5>
               <table class="sim-table">
                 <thead>
                   <tr>
-                    <th>Nút</th>
-                    <th>Chi phí từ Start</th>
-                    <th>Nút cha</th>
+                    <th>${t("simDj_tableNode")}</th>
+                    <th>${t("simDj_tableCost")}</th>
+                    <th>${t("simDj_tableParent")}</th>
                   </tr>
                 </thead>
                 <tbody id="dj-table-body">
                 </tbody>
               </table>
               <div id="dj-status" class="sim-status-box" style="margin-top: 10px; font-size:12px;">
-                Bấm "Bước tiếp" để bắt đầu thuật toán.
+                ${t("simDj_statusInit")}
               </div>
             </div>
           </div>
         </div>
       `;
 
-      // Dijkstra Graph nodes
+      // Absolute node positions in a 320x200 viewbox
       const nodes = {
-        start: { x: 10, y: 100, label: "Start" },
-        a: { x: 50, y: 40, label: "A" },
-        b: { x: 50, y: 160, label: "B" },
-        fin: { x: 90, y: 100, label: "Fin" }
+        start: { x: 30, y: 100, label: "Start" },
+        a: { x: 140, y: 40, label: "A" },
+        b: { x: 140, y: 160, label: "B" },
+        fin: { x: 250, y: 100, label: "Fin" }
       };
 
       const edges = [
@@ -954,7 +892,6 @@ window.GrokkingSimulators = {
         const svg = document.getElementById("dj-svg");
         svg.innerHTML = "";
 
-        // Render arrow markers
         const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         defs.innerHTML = `
           <marker id="dj-arrow" viewBox="0 0 10 10" refX="20" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -969,12 +906,11 @@ window.GrokkingSimulators = {
           const toNode = nodes[edge.to];
           
           const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          line.setAttribute("x1", `${fromNode.x}%`);
+          line.setAttribute("x1", fromNode.x);
           line.setAttribute("y1", fromNode.y);
-          line.setAttribute("x2", `${toNode.x}%`);
+          line.setAttribute("x2", toNode.x);
           line.setAttribute("y2", toNode.y);
           
-          // Draw bold green line if it is part of final short path
           let isShortPath = false;
           if (parents[edge.to] === edge.from && processed.has(edge.to)) {
             isShortPath = true;
@@ -988,7 +924,7 @@ window.GrokkingSimulators = {
           const midX = (fromNode.x + toNode.x) / 2;
           const midY = (fromNode.y + toNode.y) / 2;
           const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          text.setAttribute("x", `${midX}%`);
+          text.setAttribute("x", midX);
           text.setAttribute("y", midY - 8);
           text.setAttribute("text-anchor", "middle");
           text.setAttribute("fill", isShortPath ? "#34d399" : "#94a3b8");
@@ -1004,9 +940,9 @@ window.GrokkingSimulators = {
           const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
           const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          circle.setAttribute("cx", `${node.x}%`);
+          circle.setAttribute("cx", node.x);
           circle.setAttribute("cy", node.y);
-          circle.setAttribute("r", "18");
+          circle.setAttribute("r", "16");
           
           let fill = "#1e293b";
           let stroke = "#475569";
@@ -1021,17 +957,22 @@ window.GrokkingSimulators = {
 
           circle.setAttribute("fill", fill);
           circle.setAttribute("stroke", stroke);
-          circle.setAttribute("stroke-width", "3");
+          circle.setAttribute("stroke-width", "2.5");
           g.appendChild(circle);
 
           const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          text.setAttribute("x", `${node.x}%`);
+          text.setAttribute("x", node.x);
           text.setAttribute("y", node.y + 4);
           text.setAttribute("text-anchor", "middle");
           text.setAttribute("fill", "#fff");
           text.setAttribute("font-size", "10px");
           text.setAttribute("font-weight", "bold");
-          text.textContent = node.label;
+          
+          let labelText = node.label;
+          if (labelText === "Start" && currentLang === "vi") {
+            labelText = "Đầu";
+          }
+          text.textContent = labelText;
           g.appendChild(text);
 
           svg.appendChild(g);
@@ -1045,14 +986,15 @@ window.GrokkingSimulators = {
         const order = ["a", "b", "fin"];
         order.forEach(n => {
           const row = document.createElement("tr");
-          
-          // Add highlight class if it is the current processed node
           if (activeNode === n) {
             row.style.background = "rgba(217, 119, 6, 0.2)";
           }
 
           const val = costs[n] === Infinity ? "∞" : costs[n];
-          const parent = parents[n] ? parents[n].toUpperCase() : "-";
+          let parent = parents[n] ? parents[n].toUpperCase() : "-";
+          if (parent === "START" && currentLang === "vi") {
+            parent = "ĐẦU";
+          }
           
           row.innerHTML = `
             <td style="font-weight:bold;">${n.toUpperCase()}</td>
@@ -1071,12 +1013,7 @@ window.GrokkingSimulators = {
         stepCount = 0;
         activeNode = null;
 
-        document.getElementById("dj-status").innerHTML = `
-          <strong>Khởi tạo:</strong> Đã cập nhật chi phí ban đầu từ Start:<br>
-          • Đi tới A tốn <strong>6</strong><br>
-          • Đi tới B tốn <strong>2</strong><br>
-          • Đi tới Fin tốn <strong>vô cùng (∞)</strong>
-        `;
+        document.getElementById("dj-status").innerHTML = t("simDj_statusStart");
         renderGraph();
         renderTable();
       }
@@ -1103,18 +1040,21 @@ window.GrokkingSimulators = {
 
         if (node === null) {
           finished = true;
-          // Reconstruct short path
           let path = ["FIN"];
           let curr = "fin";
           while (parents[curr]) {
-            path.push(parents[curr].toUpperCase());
+            let pName = parents[curr].toUpperCase();
+            if (pName === "START" && currentLang === "vi") {
+              pName = "ĐẦU";
+            }
+            path.push(pName);
             curr = parents[curr];
           }
           path.reverse();
-          document.getElementById("dj-status").innerHTML = `
-            <strong>Hoàn thành!</strong> Đã xử lý tất cả các nút.<br>
-            Đường đi ngắn nhất: <strong style="color:#10b981;">${path.join(" ➔ ")}</strong> với tổng chi phí = <strong>${costs.fin}</strong>.
-          `;
+          document.getElementById("dj-status").innerHTML = t("simDj_statusCompleted", {
+            path: path.join(" ➔ "),
+            cost: costs.fin
+          });
           activeNode = null;
           renderGraph();
           renderTable();
@@ -1122,22 +1062,21 @@ window.GrokkingSimulators = {
         }
 
         const cost = costs[node];
-        // Get neighbors of current node
         let neighbors = {};
         if (node === "a") neighbors = { fin: 1 };
         if (node === "b") neighbors = { a: 3, fin: 5 };
 
         let logs = [];
-        logs.push(`<strong>Bước ${stepCount}:</strong> Chọn nút rẻ nhất chưa xử lý là <strong>${node.toUpperCase()}</strong> (chi phí = <strong>${cost}</strong>).`);
+        logs.push(t("simDj_statusStep", { step: stepCount, node: node.toUpperCase(), cost }));
 
         for (let n in neighbors) {
           let newCost = cost + neighbors[n];
           if (newCost < costs[n]) {
             costs[n] = newCost;
             parents[n] = node;
-            logs.push(`• Cập nhật chi phí tới <strong>${n.toUpperCase()}</strong>: <code>${newCost}</code> (qua ${node.toUpperCase()}).`);
+            logs.push(t("simDj_statusUpdate", { n, newCost, node }));
           } else {
-            logs.push(`• Đi tới <strong>${n.toUpperCase()}</strong> qua ${node.toUpperCase()} tốn <code>${newCost}</code> (không tốt hơn chi phí hiện tại <code>${costs[n]}</code>).`);
+            logs.push(t("simDj_statusNoUpdate", { n, node, newCost, cost: costs[n] }));
           }
         }
 
@@ -1160,48 +1099,47 @@ window.GrokkingSimulators = {
     init: function(container) {
       container.innerHTML = `
         <div class="sim-wrapper">
-          <h3>Mô phỏng K-Láng giềng gần nhất (KNN)</h3>
-          <p class="sim-desc">Click chuột vào vùng bảng đồ thị dưới để tạo một quả <strong>Cam hoặc Táo mới</strong> (tọa độ đại diện cho Độ ngọt và Kích thước). KNN sẽ tìm K điểm gần nhất để phân loại quả đó.</p>
+          <h3>${t("simKnn_title")}</h3>
+          <p class="sim-desc">${t("simKnn_desc")}</p>
 
           <div class="sim-controls">
-            <label>Giá trị K: </label>
+            <label>${t("simKnn_kVal")}</label>
             <select id="knn-k-val" style="background:#1e293b; color:#fff; border:1px solid #475569; border-radius:4px; padding: 2px 5px;">
               <option value="1">K = 1</option>
               <option value="3" selected>K = 3</option>
               <option value="5">K = 5</option>
             </select>
-            <button id="knn-btn-clear" class="btn btn-primary">Xóa điểm test</button>
+            <button id="knn-btn-clear" class="btn btn-primary">${t("simKnn_btnClear")}</button>
           </div>
 
           <div style="display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap;">
             <div style="flex: 1.2; min-width: 280px; position:relative;">
               <canvas id="knn-canvas" width="300" height="220" style="background:#0f172a; border-radius:8px; border:1px solid #1e293b; width:100%; cursor:crosshair;"></canvas>
               <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b; padding:2px 5px;">
-                <span>← Ít ngọt (Độ Ngọt) Nhiều ngọt →</span>
-                <span>↑ Quả to (Kích thước)</span>
+                <span>${t("simKnn_sweetnessLabel")}</span>
+                <span>${t("simKnn_sizeLabel")}</span>
               </div>
             </div>
             
             <div style="flex: 0.8; min-width: 220px;">
-              <h5>Chú giải:</h5>
+              <h5>${t("simKnn_legendTitle")}</h5>
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:12px;">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#ef4444;"></span> Cam (Orange)
-                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#10b981; margin-left: 15px;"></span> Táo (Apple)
+                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#ef4444;"></span> ${t("simKnn_legendOrange")}
+                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#10b981; margin-left: 15px;"></span> ${t("simKnn_legendApple")}
               </div>
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:15px; font-size:12px;">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; border:2px dashed #fbbf24; background:transparent;"></span> Quả cần đoán
+                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; border:2px dashed #fbbf24; background:transparent;"></span> ${t("simKnn_legendTest")}
               </div>
               
-              <h5>Kết quả phân loại:</h5>
+              <h5>${t("simKnn_resultTitle")}</h5>
               <div id="knn-status" class="sim-status-box" style="height: 100px; font-size: 13px;">
-                Click vào đồ thị bên trái để bắt đầu đoán loại quả.
+                ${t("simKnn_statusInit")}
               </div>
             </div>
           </div>
         </div>
       `;
 
-      // Static dataset of existing fruits (coordinates out of width=300, height=220)
       const dataPoints = [
         { x: 50, y: 170, type: "orange" },
         { x: 70, y: 150, type: "orange" },
@@ -1245,7 +1183,7 @@ window.GrokkingSimulators = {
         dataPoints.forEach(pt => {
           ctx.beginPath();
           ctx.arc(pt.x, pt.y, 6, 0, 2 * Math.PI);
-          ctx.fillStyle = pt.type === "orange" ? "#ef4444" : "#10b981"; // redish-orange vs green apple
+          ctx.fillStyle = pt.type === "orange" ? "#ef4444" : "#10b981"; 
           ctx.fill();
           ctx.strokeStyle = "#fff";
           ctx.lineWidth = 1.5;
@@ -1254,7 +1192,6 @@ window.GrokkingSimulators = {
 
         // Draw test point if exists
         if (testPoint) {
-          // Find K nearest
           const kVal = parseInt(document.getElementById("knn-k-val").value) || 3;
           const distances = dataPoints.map(pt => {
             let dist = Math.sqrt((pt.x - testPoint.x)**2 + (pt.y - testPoint.y)**2);
@@ -1275,12 +1212,12 @@ window.GrokkingSimulators = {
             ctx.lineTo(n.pt.x, n.pt.y);
             ctx.stroke();
           });
-          ctx.setLineDash([]); // Reset
+          ctx.setLineDash([]); 
 
           // Draw the test point
           ctx.beginPath();
           ctx.arc(testPoint.x, testPoint.y, 8, 0, 2 * Math.PI);
-          ctx.fillStyle = "#fbbf24"; // amber
+          ctx.fillStyle = "#fbbf24"; 
           ctx.fill();
           ctx.strokeStyle = "#fff";
           ctx.lineWidth = 2;
@@ -1289,21 +1226,23 @@ window.GrokkingSimulators = {
           // Classify
           let orangeCount = nearest.filter(n => n.pt.type === "orange").length;
           let appleCount = nearest.filter(n => n.pt.type === "apple").length;
-          let winner = orangeCount > appleCount ? "Cam (Orange)" : "Táo (Apple)";
+          
+          let winner = orangeCount > appleCount ? t("simKnn_orange") : t("simKnn_apple");
           let winnerColor = orangeCount > appleCount ? "#ef4444" : "#10b981";
 
-          document.getElementById("knn-status").innerHTML = `
-            • Tọa độ test: <code>Sweet=${testPoint.x}, Size=${Math.round(220-testPoint.y)}</code>.<br>
-            • Kết quả lân cận (K=${kVal}): <br>
-            - Cam (Đỏ): <strong>${orangeCount}</strong> quả.<br>
-            - Táo (Xanh): <strong>${appleCount}</strong> quả.<br>
-            ➔ Phân loại quả này là: <strong style="color:${winnerColor}; font-size:15px;">${winner}</strong>.
-          `;
+          document.getElementById("knn-status").innerHTML = t("simKnn_statusResult", {
+            sweet: Math.round(testPoint.x),
+            size: Math.round(220 - testPoint.y),
+            kVal,
+            oranges: orangeCount,
+            apples: appleCount,
+            winner,
+            color: winnerColor
+          });
         }
       }
 
       function handleCanvasClick(e) {
-        // Correct for scaling
         const rect = canvas.getBoundingClientRect();
         const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
         const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
@@ -1315,7 +1254,7 @@ window.GrokkingSimulators = {
       document.getElementById("knn-k-val").addEventListener("change", draw);
       document.getElementById("knn-btn-clear").addEventListener("click", () => {
         testPoint = null;
-        document.getElementById("knn-status").innerText = "Đã xóa điểm test. Click vào đồ thị để test lại.";
+        document.getElementById("knn-status").innerText = t("simKnn_clearStatus");
         draw();
       });
 
