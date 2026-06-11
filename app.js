@@ -16,6 +16,8 @@
   // Language state (retrieve from local storage or default to Vietnamese)
   let currentLang = localStorage.getItem("grokking_lang") || "vi";
   let GrokkingData = currentLang === "vi" ? GrokkingDataVI : GrokkingDataEN;
+  // Expose language globally so simulators.js (plain global scope) can read it
+  window.currentLang = currentLang;
 
   // ---- Translation Helper ----
   function t(key, replacements) {
@@ -706,6 +708,7 @@
         const lang = btn.getAttribute("data-lang");
         if (lang !== currentLang) {
           currentLang = lang;
+          window.currentLang = lang;
           localStorage.setItem("grokking_lang", currentLang);
           GrokkingData = currentLang === "vi" ? GrokkingDataVI : GrokkingDataEN;
           updateActiveBtn();
